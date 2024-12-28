@@ -47,12 +47,12 @@ export class PlanViewport extends Viewport {
 
   constructor(divId: string) {
     super(divId);
+    this.cursor.name = "2dcursor";
     this.camera.position.set(0, 0, 10);
     this.camera.up.set(0, 0, 1);
     this.controller.enableRotate = false;
     this.gridHelper.rotateX(1.5807);
     this.scene.add(this.gridHelper);
-    this.scene.add(this.cursor);
   }
 
   resize(): void {
@@ -68,6 +68,16 @@ export class PlanViewport extends Viewport {
   }
 
   mouseControl(): void {
+    this.divElement.addEventListener("mouseenter", (e) => {
+      this.scene.add(this.cursor);
+    });
+    this.divElement.addEventListener("mouseleave", (e) => {
+      const curCursor = this.scene.getObjectByName("2dcursor");
+      if (curCursor) {
+        this.scene.remove(curCursor);
+      }
+    });
+
     this.divElement.addEventListener("pointermove", (e) => {
       const worldPosition = this.getWorldCoorinates(e.clientX, e.clientY);
 
@@ -88,6 +98,10 @@ export class PlanViewport extends Viewport {
   }
 
   createPlanLine(): THREE.BufferGeometry {
+    // Start prompt message
+    this.promptMessageElement.classList.toggle("hidden");
+    this.promptMessageElement.innerText = "Pick first point of the new line";
+
     const points: THREE.Vector3[] = [];
     const lineGeom: THREE.BufferGeometry = new THREE.BufferGeometry();
 
@@ -114,14 +128,21 @@ export class PlanViewport extends Viewport {
       points.push(new THREE.Vector3(mouseCoords.x, mouseCoords.y, 0));
 
       if (points.length === 1) {
+        // change prompt
+        this.promptMessageElement.innerText = "Pick second point of the line";
         // Add preview line to the scene for dynamic updates
         previewGeom.setFromPoints([points[0], points[0]]); // Initialize with the same point
         this.scene.add(previewLine);
         this.divElement.addEventListener("mousemove", moveListener);
       }
       if (points.length == 2) {
+        // hide prompt
+        this.promptMessageElement.classList.toggle("hidden");
+
+        // don't listen to move anymore
         this.divElement.removeEventListener("mousemove", moveListener);
-        console.log(points);
+
+        // create line, add to scene, remove this listener and return geom buffer
         lineGeom.setFromPoints(points);
         const lineMat = new THREE.MeshBasicMaterial({ color: 0x4287f5 });
         const line = new THREE.Line(lineGeom, lineMat);

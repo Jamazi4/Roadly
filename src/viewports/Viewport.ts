@@ -4,6 +4,7 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 export abstract class Viewport {
   // DOM
   protected divElement: HTMLElement;
+  protected promptMessageElement: HTMLElement;
   protected viewportWidth: number;
   protected viewportHeight: number;
   protected aspect: number;
@@ -28,6 +29,8 @@ export abstract class Viewport {
 
   constructor(divId: string) {
     this.divElement = document.getElementById(divId)!;
+    this.promptMessageElement =
+      this.divElement.querySelector(".prompt-message")!;
     this.viewportWidth = this.divElement.offsetWidth;
     this.viewportHeight = this.divElement.offsetHeight;
     this.aspect = this.viewportWidth / this.viewportHeight;
@@ -42,14 +45,14 @@ export abstract class Viewport {
   }
 
   public update(): void {
-    this.aspect = this.viewportWidth / this.viewportHeight;
-    this.controller.update();
     this.renderer.render(this.scene, this.camera);
+    this.controller.update();
   }
 
   resize(): void {
     this.viewportWidth = this.divElement.clientWidth;
     this.viewportHeight = this.divElement.clientHeight;
+    this.aspect = this.viewportWidth / this.viewportHeight;
   }
   abstract mouseControl(): void;
 }
