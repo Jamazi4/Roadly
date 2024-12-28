@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="src/style.css" />
+    <title>Roadly</title>
+  </head>
+  <body>
+    <div class="main-app" id="app">
+      <div class="navbar">
+        <button class="btn">Load</button>
+      </div>
+
+      <div class="views">
+        <div class="plan-view view" id="plan-view">
+          <p class="view-label">plan</p>
+          <div class="plan-view-menu">
+            <button class="btn btn-line" id="btn-line"></button>
+          </div>
+        </div>
+
+        <div class="3d-view view" id="3d-view">
+          <p class="view-label">3D</p>
+        </div>
+
+        <div class="profile-view view">
+          <p class="view-label">profile</p>
+        </div>
+
+        <div class="cross-section view">
+          <p class="view-label">cross-section</p>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
