@@ -36,7 +36,7 @@ export abstract class Viewport {
     this.aspect = this.viewportWidth / this.viewportHeight;
     this.rect = this.divElement.getBoundingClientRect();
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: false });
     this.renderer.setSize(this.viewportWidth, this.viewportHeight);
     this.scene = new THREE.Scene();
     this.scene.background = this.backgroundColor;

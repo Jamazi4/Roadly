@@ -33,6 +33,7 @@ function animate() {
 planViewport.renderer.setAnimationLoop(animate);
 
 // RESIZING
+// TODO: something is not working with cursor after resize
 window.addEventListener("resize", () => {
   planViewport.resize();
   threeDViewport.resize();

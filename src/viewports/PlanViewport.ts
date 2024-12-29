@@ -53,6 +53,7 @@ export class PlanViewport extends Viewport {
     this.controller.enableRotate = false;
     this.gridHelper.rotateX(1.5807);
     this.scene.add(this.gridHelper);
+    this.cursorGeom.center();
   }
 
   resize(): void {
@@ -67,33 +68,40 @@ export class PlanViewport extends Viewport {
     this.renderer.setSize(this.viewportWidth, this.viewportHeight);
   }
 
+  // Move to parent class after ensuring each viewport has some cursor
   mouseControl(): void {
-    this.divElement.addEventListener("mouseenter", (e) => {
+    // Cursor disappearing and appearing
+    this.divElement.addEventListener("mouseenter", () => {
       this.scene.add(this.cursor);
     });
-    this.divElement.addEventListener("mouseleave", (e) => {
+    this.divElement.addEventListener("mouseleave", () => {
       const curCursor = this.scene.getObjectByName("2dcursor");
       if (curCursor) {
         this.scene.remove(curCursor);
       }
     });
 
+    // General mousetracking
     this.divElement.addEventListener("pointermove", (e) => {
-      const worldPosition = this.getWorldCoorinates(e.clientX, e.clientY);
+      const worldPosition = this.getWorldCoorinates(e.x, e.y);
 
       this.cursor.position.set(worldPosition.x, worldPosition.y, 0);
     });
   }
 
+  // Convert mouse client coords to world coords
   private getWorldCoorinates(mouseX: number, mouseY: number): THREE.Vector3 {
     const raycaster = new THREE.Raycaster();
     const worldPosition = new THREE.Vector3();
+
     const ndcX = ((mouseX - this.rect.left) / this.rect.width) * 2 - 1;
     const ndcY = -((mouseY - this.rect.top) / this.rect.height) * 2 + 1;
     const ndcVec = new THREE.Vector2(ndcX, ndcY);
+
     raycaster.setFromCamera(ndcVec, this.camera);
     const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
     raycaster.ray.intersectPlane(plane, worldPosition);
+
     return worldPosition;
   }
 
