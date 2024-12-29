@@ -3,6 +3,7 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { Viewport } from "./Viewport";
 import { CursorCrosshair } from "../components/CursorCrosshair";
 import { LineObj } from "../Objects/LineObj";
+import { int } from "three/tsl";
 
 export class PlanViewport extends Viewport {
   // Camera
@@ -28,7 +29,9 @@ export class PlanViewport extends Viewport {
     this.gridDivisions
   );
 
-  public planObjects: THREE.Object3D[] = [];
+  public linesList: LineObj[] = [];
+  private highlights: LineObj[] = [];
+  public intersectionList: THREE.Object3D[] = [];
   // CURSOR
   private cursor = new CursorCrosshair();
 
@@ -75,9 +78,46 @@ export class PlanViewport extends Viewport {
     this.divElement.addEventListener("pointermove", (e) => {
       const worldPosition = this.getWorldCoorinates(e.x, e.y);
 
+      // moving the cursor
       this.cursor.setPosition(worldPosition.x, worldPosition.y, 0);
 
-      let intersections = this.raycaster.intersectObjects(this.planObjects);
+      // highlighting objects
+      let intersections = this.raycaster.intersectObjects(
+        this.intersectionList
+      );
+      if (intersections.length > 0) {
+        // put out all highlights
+        this.highlights.forEach((line: LineObj) => {
+          line.getPlan().material = line.defaultMat;
+        });
+
+        // empty the highlights list
+        this.highlights = [];
+
+        // find closest object from intersections list
+        const intersection = intersections.reduce((closest, curr) => {
+          return curr.point.distanceTo(worldPosition) <
+            closest.point.distanceTo(worldPosition)
+            ? curr
+            : closest;
+        });
+
+        const intersectId = intersection.object.id;
+
+        // find that object in all created lineObjs
+        const intersectLineObj = this.linesList.filter((line: LineObj) => {
+          return line.getPlan().id === intersectId;
+        });
+
+        // push to highlights for tracking
+        this.highlights.push(intersectLineObj[0]);
+
+        // if (!intersectLineObj) return;
+        if (intersection.point.distanceToSquared(worldPosition) < 0.1) {
+          this.highlights.push(intersectLineObj[0]);
+          this.highlights[0].highlight();
+        }
+      }
     });
   }
 
@@ -147,7 +187,10 @@ export class PlanViewport extends Viewport {
         // create line, add to scene, remove this listener and return geom buffer
         newLine.createPlan(points[0], points[1]);
         this.scene.add(newLine.getPlan());
-        this.planObjects.push(newLine.getPlan());
+
+        // push to array of lineObjs and array ob Object3D for intersection
+        this.linesList.push(newLine);
+        this.intersectionList.push(newLine.getPlan());
 
         this.scene.remove(previewLine);
 

@@ -82,6 +82,7 @@ body {
 }
 
 .view-label {
+  user-select: none;
   position: absolute;
   color: rgba(255, 255, 255, 0.342);
   margin: 10px;
