@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { Viewport } from "./Viewport";
 import { CursorCrosshair } from "../components/CursorCrosshair";
+import { LineObj } from "../Objects/LineObj";
 
 export class PlanViewport extends Viewport {
   // Camera
@@ -18,12 +19,16 @@ export class PlanViewport extends Viewport {
   // Controller
   protected controller: OrbitControls;
 
+  // Raycaster
+  raycaster: THREE.Raycaster;
+
   // GRID
   protected gridHelper = new THREE.GridHelper(
     this.gridSize,
     this.gridDivisions
   );
 
+  public planObjects: THREE.Object3D[] = [];
   // CURSOR
   private cursor = new CursorCrosshair();
 
@@ -38,6 +43,7 @@ export class PlanViewport extends Viewport {
     this.controller.target.set(0, 0, 0);
     this.gridHelper.rotation.set(Math.PI / 2, 0, 0);
     this.scene.add(this.gridHelper);
+    this.raycaster = new THREE.Raycaster();
   }
 
   resize(): void {
@@ -69,46 +75,47 @@ export class PlanViewport extends Viewport {
     this.divElement.addEventListener("pointermove", (e) => {
       const worldPosition = this.getWorldCoorinates(e.x, e.y);
 
-      this.cursor.get().position.set(worldPosition.x, worldPosition.y, 0);
+      this.cursor.setPosition(worldPosition.x, worldPosition.y, 0);
+
+      let intersections = this.raycaster.intersectObjects(this.planObjects);
     });
   }
 
   // Convert mouse client coords to world coords
   private getWorldCoorinates(mouseX: number, mouseY: number): THREE.Vector3 {
-    const raycaster = new THREE.Raycaster();
     const worldPosition = new THREE.Vector3();
 
     const ndcX = ((mouseX - this.rect.left) / this.rect.width) * 2 - 1;
     const ndcY = -((mouseY - this.rect.top) / this.rect.height) * 2 + 1;
     const ndcVec = new THREE.Vector2(ndcX, ndcY);
 
-    raycaster.setFromCamera(ndcVec, this.camera);
+    this.raycaster.setFromCamera(ndcVec, this.camera);
     const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-    raycaster.ray.intersectPlane(plane, worldPosition);
+    this.raycaster.ray.intersectPlane(plane, worldPosition);
 
     return worldPosition;
   }
 
-  createPlanLine(): THREE.BufferGeometry {
+  createPlanLine(): LineObj {
     // Start prompt message
     this.promptMessageElement.classList.toggle("hidden");
     this.promptMessageElement.innerText = "Pick first point of the new line";
 
     const points: THREE.Vector3[] = [];
-    const lineGeom: THREE.BufferGeometry = new THREE.BufferGeometry();
 
     // Material for the dynamic preview line
     const previewMat = new THREE.LineBasicMaterial({ color: 0x808080 });
     const previewGeom = new THREE.BufferGeometry();
     const previewLine = new THREE.Line(previewGeom, previewMat);
+    previewLine.name = "previewLine";
 
     let dummyPoint = new THREE.Vector3();
+    let newLine: LineObj = new LineObj();
 
-    // For tracking end of dummyline
+    // For tracking end of preview line
     const moveListener = (e: MouseEvent) => {
       const mouseCoords = this.getWorldCoorinates(e.clientX, e.clientY);
       dummyPoint.set(mouseCoords.x, mouseCoords.y, 0);
-
       // Update the preview line's geometry
       const previewPoints = [points[0], dummyPoint];
       previewGeom.setFromPoints(previewPoints);
@@ -119,12 +126,15 @@ export class PlanViewport extends Viewport {
       const mouseCoords = this.getWorldCoorinates(e.clientX, e.clientY);
       points.push(new THREE.Vector3(mouseCoords.x, mouseCoords.y, 0));
 
+      // second point is under the mouse for rendering preview line
       if (points.length === 1) {
         // change prompt
         this.promptMessageElement.innerText = "Pick second point of the line";
         // Add preview line to the scene for dynamic updates
         previewGeom.setFromPoints([points[0], points[0]]); // Initialize with the same point
         this.scene.add(previewLine);
+
+        // add this move
         this.divElement.addEventListener("mousemove", moveListener);
       }
       if (points.length == 2) {
@@ -135,16 +145,17 @@ export class PlanViewport extends Viewport {
         this.divElement.removeEventListener("mousemove", moveListener);
 
         // create line, add to scene, remove this listener and return geom buffer
-        lineGeom.setFromPoints(points);
-        const lineMat = new THREE.MeshBasicMaterial({ color: 0x4287f5 });
-        const line = new THREE.Line(lineGeom, lineMat);
-        this.scene.add(line);
+        newLine.createPlan(points[0], points[1]);
+        this.scene.add(newLine.getPlan());
+        this.planObjects.push(newLine.getPlan());
+
+        this.scene.remove(previewLine);
+
         this.divElement.removeEventListener("click", clickListener);
-        return lineGeom;
       }
     };
 
     this.divElement.addEventListener("click", clickListener);
-    return lineGeom;
+    return newLine;
   }
 }

@@ -21,6 +21,10 @@ export class CursorCrosshair {
     this.lineGroup.add(this.line2);
   }
 
+  setPosition(x: number, y: number, z: number) {
+    this.lineGroup.position.set(x, y, z);
+  }
+
   get() {
     return this.lineGroup;
   }

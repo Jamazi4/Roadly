@@ -17,12 +17,6 @@ export abstract class Viewport {
   protected gridSize = 10;
   protected gridDivisions = 10;
 
-  protected cursorMat = new THREE.LineBasicMaterial({
-    color: 0xff0000,
-    transparent: true,
-    opacity: 0.5,
-  });
-
   protected abstract camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
   protected abstract controller: OrbitControls;
   protected abstract gridHelper: THREE.GridHelper;

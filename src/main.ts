@@ -5,7 +5,7 @@ import { ThreeDViewport } from "./viewports/ThreeDViewport";
 const btnLine = document.getElementById("btn-line")!;
 btnLine.addEventListener("click", (e) => {
   e.stopPropagation();
-  planViewport.createPlanLine();
+  const line = planViewport.createPlanLine();
 });
 
 // Init viewports
