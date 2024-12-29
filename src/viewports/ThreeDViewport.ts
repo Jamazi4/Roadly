@@ -8,11 +8,11 @@ export class ThreeDViewport extends Viewport {
   protected camera = new THREE.PerspectiveCamera(75, this.aspect, 0.1, 1000);
 
   // Lights
-  hemiSphereLight = new THREE.HemisphereLight(0xffffff, 0x888888, 1);
-  directionalLight = new THREE.DirectionalLight(0xffffff, 3);
+  private hemiSphereLight = new THREE.HemisphereLight(0xffffff, 0x888888, 1);
+  private directionalLight = new THREE.DirectionalLight(0xffffff, 3);
 
   // Controller
-  controller: OrbitControls;
+  protected controller: OrbitControls;
 
   // GRID
   protected gridHelper = new THREE.GridHelper(
@@ -22,9 +22,9 @@ export class ThreeDViewport extends Viewport {
 
   constructor(divId: string) {
     super(divId);
-    this.camera.up.set(0, 0, 1);
     this.camera.lookAt(0, 0, 0);
     this.camera.position.set(5, 5, 5);
+    this.camera.up.set(0, 0, 1);
     this.controller = new OrbitControls(this.camera, this.renderer.domElement);
 
     this.gridHelper.rotateX(1.5807);

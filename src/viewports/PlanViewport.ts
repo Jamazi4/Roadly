@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { Viewport } from "./Viewport";
+import { CursorCrosshair } from "../components/CursorCrosshair";
 
 export class PlanViewport extends Viewport {
   // Camera
@@ -15,10 +16,7 @@ export class PlanViewport extends Viewport {
   );
 
   // Controller
-  protected controller = new OrbitControls(
-    this.camera,
-    this.renderer.domElement
-  );
+  protected controller: OrbitControls;
 
   // GRID
   protected gridHelper = new THREE.GridHelper(
@@ -27,33 +25,19 @@ export class PlanViewport extends Viewport {
   );
 
   // CURSOR
-  private cursorY = 0;
-  private cursorX = 0;
-  private cursorCircle = new THREE.EllipseCurve(
-    this.cursorX,
-    this.cursorY,
-    0.1,
-    0.1,
-    0,
-    2 * Math.PI,
-    false,
-    0
-  );
-  private cursorPoints = this.cursorCircle.getPoints(32);
-  private cursorGeom = new THREE.BufferGeometry().setFromPoints(
-    this.cursorPoints
-  );
-  private cursor = new THREE.Line(this.cursorGeom, this.cursorMat);
+  private cursor = new CursorCrosshair();
 
   constructor(divId: string) {
     super(divId);
-    this.cursor.name = "2dcursor";
+    this.cursor.get().name = "2dcursor";
     this.camera.position.set(0, 0, 10);
     this.camera.up.set(0, 0, 1);
+    this.controller = new OrbitControls(this.camera, this.renderer.domElement);
     this.controller.enableRotate = false;
-    this.gridHelper.rotateX(1.5807);
+    this.controller.screenSpacePanning = true;
+    this.controller.target.set(0, 0, 0);
+    this.gridHelper.rotation.set(Math.PI / 2, 0, 0);
     this.scene.add(this.gridHelper);
-    this.cursorGeom.center();
   }
 
   resize(): void {
@@ -72,7 +56,7 @@ export class PlanViewport extends Viewport {
   mouseControl(): void {
     // Cursor disappearing and appearing
     this.divElement.addEventListener("mouseenter", () => {
-      this.scene.add(this.cursor);
+      this.scene.add(this.cursor.get());
     });
     this.divElement.addEventListener("mouseleave", () => {
       const curCursor = this.scene.getObjectByName("2dcursor");
@@ -85,7 +69,7 @@ export class PlanViewport extends Viewport {
     this.divElement.addEventListener("pointermove", (e) => {
       const worldPosition = this.getWorldCoorinates(e.x, e.y);
 
-      this.cursor.position.set(worldPosition.x, worldPosition.y, 0);
+      this.cursor.get().position.set(worldPosition.x, worldPosition.y, 0);
     });
   }
 
