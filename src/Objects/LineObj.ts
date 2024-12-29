@@ -1,26 +1,45 @@
 import * as THREE from "three";
-import { color } from "three/tsl";
+import { VertexMarker } from "../utils/VertexMarker";
 
 export class LineObj {
-  defaultMat = new THREE.MeshBasicMaterial({ color: 0x4287f5 });
-  selectedMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  defaultMat = new THREE.LineBasicMaterial({ color: 0x4287f5 });
   planGeom = new THREE.BufferGeometry();
   planRepr: THREE.Line = new THREE.Line();
+  planGroup: THREE.Group = new THREE.Group();
 
   constructor() {}
 
   createPlan(start: THREE.Vector3, end: THREE.Vector3) {
     this.planGeom.setFromPoints([start, end]);
     this.planRepr = new THREE.Line(this.planGeom, this.defaultMat);
+    this.planRepr.name = "line";
+    this.planGroup.add(this.planRepr);
+    console.log(this.planGroup.id);
   }
 
   highlight() {
     this.planRepr.material = this.highlightMaterial();
   }
 
-  select() {}
+  select() {
+    const positions = this.planRepr.geometry.attributes.position.array;
+    for (let i = 0; i < positions.length; i += 3) {
+      const x = positions[i];
+      const y = positions[i + 1];
+      const z = positions[i + 2];
 
-  getPlan(): THREE.Line {
+      const marker = new VertexMarker();
+      marker.getMarker().name = `marker${i}`;
+      marker.getMarker().position.set(x, y, z);
+      this.planGroup.add(marker.getMarker());
+    }
+  }
+
+  getPlanGroup(): THREE.Group {
+    return this.planGroup;
+  }
+
+  getPlanRepr(): THREE.Line {
     return this.planRepr;
   }
 
@@ -39,6 +58,10 @@ export class LineObj {
     // Step 3: Convert RGB back to hex
     const brightenedColor = (r << 16) | (g << 8) | b;
 
-    return new THREE.MeshBasicMaterial({ color: brightenedColor });
+    return new THREE.LineBasicMaterial({ color: brightenedColor });
+  }
+
+  unhighlight() {
+    this.planRepr.material = this.defaultMat;
   }
 }

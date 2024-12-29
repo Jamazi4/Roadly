@@ -1,9 +1,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { Viewport } from "./Viewport";
-import { CursorCrosshair } from "../components/CursorCrosshair";
+import { CursorCrosshair } from "../utils/CursorCrosshair";
 import { LineObj } from "../Objects/LineObj";
-import { int } from "three/tsl";
 
 export class PlanViewport extends Viewport {
   // Camera
@@ -88,7 +87,8 @@ export class PlanViewport extends Viewport {
       if (intersections.length > 0) {
         // put out all highlights
         this.highlights.forEach((line: LineObj) => {
-          line.getPlan().material = line.defaultMat;
+          line.unhighlight();
+          // line.getPlanGroup().material = line.defaultMat;
         });
 
         // empty the highlights list
@@ -106,19 +106,20 @@ export class PlanViewport extends Viewport {
 
         // find that object in all created lineObjs
         const intersectLineObj = this.linesList.filter((line: LineObj) => {
-          return line.getPlan().id === intersectId;
+          return line.getPlanRepr().id === intersectId;
         });
 
         // push to highlights for tracking
         this.highlights.push(intersectLineObj[0]);
 
-        // if (!intersectLineObj) return;
+        // Finally highlight if the distance is < 0.1
         if (intersection.point.distanceToSquared(worldPosition) < 0.1) {
-          this.highlights.push(intersectLineObj[0]);
           this.highlights[0].highlight();
         }
       }
     });
+
+    // this.divElement.addEventListener()
   }
 
   // Convert mouse client coords to world coords
@@ -152,7 +153,7 @@ export class PlanViewport extends Viewport {
     let dummyPoint = new THREE.Vector3();
     let newLine: LineObj = new LineObj();
 
-    // For tracking end of preview line
+    // For tracking end of preview line -> TODO: move preview to LineObj class
     const moveListener = (e: MouseEvent) => {
       const mouseCoords = this.getWorldCoorinates(e.clientX, e.clientY);
       dummyPoint.set(mouseCoords.x, mouseCoords.y, 0);
@@ -171,7 +172,8 @@ export class PlanViewport extends Viewport {
         // change prompt
         this.promptMessageElement.innerText = "Pick second point of the line";
         // Add preview line to the scene for dynamic updates
-        previewGeom.setFromPoints([points[0], points[0]]); // Initialize with the same point
+        // Initialize with the same point
+        previewGeom.setFromPoints([points[0], points[0]]);
         this.scene.add(previewLine);
 
         // add this move
@@ -184,13 +186,14 @@ export class PlanViewport extends Viewport {
         // don't listen to move anymore
         this.divElement.removeEventListener("mousemove", moveListener);
 
-        // create line, add to scene, remove this listener and return geom buffer
+        // create line, add to scene,
+        // remove this listener and return geom buffer
         newLine.createPlan(points[0], points[1]);
-        this.scene.add(newLine.getPlan());
+        this.scene.add(newLine.getPlanGroup());
 
         // push to array of lineObjs and array ob Object3D for intersection
         this.linesList.push(newLine);
-        this.intersectionList.push(newLine.getPlan());
+        this.intersectionList.push(newLine.getPlanGroup());
 
         this.scene.remove(previewLine);
 
