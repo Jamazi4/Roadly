@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { ObjectStates } from "../components/ObjectStateManager";
+import { ObjectStates } from "../components/ObjectManager";
 
 export abstract class RoadlyObj {
   abstract highlight(): void;

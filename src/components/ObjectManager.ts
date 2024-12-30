@@ -15,7 +15,7 @@ export enum PrimaryNames {
   line = "line",
 }
 
-export class ObjectStateManager {
+export class ObjectManager {
   container: RoadlyObj[] = [];
 
   constructor() {}
@@ -81,4 +81,6 @@ export class ObjectStateManager {
     });
     return obj[0];
   }
+
+  updateMarkerSize() {}
 }

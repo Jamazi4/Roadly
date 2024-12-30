@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { VertexMarker } from "../utils/VertexMarker";
 import { RoadlyObj } from "./RoadlyObj";
-import { ObjectStates } from "../components/ObjectStateManager";
+import { ObjectStates } from "../components/ObjectManager";
 
 export class LineObj extends RoadlyObj {
   defaultMat = new THREE.LineBasicMaterial({ color: 0x4287f5 });

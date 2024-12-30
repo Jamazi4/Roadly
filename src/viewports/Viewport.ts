@@ -21,6 +21,11 @@ export abstract class Viewport {
   protected abstract controller: OrbitControls;
   protected abstract gridHelper: THREE.GridHelper;
 
+  protected baseHighlightDistance = 0.01;
+  protected highlightDistance = this.baseHighlightDistance;
+
+  protected initialFov = 75;
+
   constructor(divId: string) {
     this.divElement = document.getElementById(divId)!;
     this.promptMessageElement =
@@ -34,13 +39,22 @@ export abstract class Viewport {
     this.renderer.setSize(this.viewportWidth, this.viewportHeight);
     this.scene = new THREE.Scene();
     this.scene.background = this.backgroundColor;
-
     this.divElement.appendChild(this.renderer.domElement);
+  }
+
+  // overriden in 3D
+  protected onZoomUpdate(): void {
+    this.controller.addEventListener("change", (e) => {
+      this.highlightDistance = this.baseHighlightDistance / this.camera.zoom;
+    });
   }
 
   public update(): void {
     this.renderer.render(this.scene, this.camera);
     this.controller.update();
+    this.onZoomUpdate();
+
+    // console.log(this.highlightDistance);
   }
 
   resize(): void {

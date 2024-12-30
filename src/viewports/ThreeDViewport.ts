@@ -20,6 +20,8 @@ export class ThreeDViewport extends Viewport {
     this.gridDivisions
   );
 
+  private initialDistance: number;
+
   constructor(divId: string) {
     super(divId);
     this.camera.lookAt(0, 0, 0);
@@ -32,6 +34,21 @@ export class ThreeDViewport extends Viewport {
     this.scene.add(this.hemiSphereLight);
     this.scene.add(this.directionalLight);
     this.scene.add(this.gridHelper);
+
+    this.initialDistance = this.camera.position.distanceTo(
+      this.controller.target
+    );
+  }
+
+  protected onZoomUpdate(): void {
+    this.controller.addEventListener("change", (e) => {
+      const currentDistance = this.camera.position.distanceTo(
+        this.controller.target
+      );
+
+      const zoomFactor = this.initialDistance / currentDistance;
+      this.highlightDistance = this.baseHighlightDistance * zoomFactor;
+    });
   }
 
   resize(): void {

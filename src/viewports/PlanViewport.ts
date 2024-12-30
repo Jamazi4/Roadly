@@ -3,10 +3,7 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { Viewport } from "./Viewport";
 import { CursorCrosshair } from "../utils/CursorCrosshair";
 import { LineObj } from "../Objects/LineObj";
-import {
-  ObjectStateManager,
-  ObjectStates,
-} from "../components/ObjectStateManager";
+import { ObjectManager, ObjectStates } from "../components/ObjectManager";
 
 export class PlanViewport extends Viewport {
   // Camera
@@ -32,7 +29,7 @@ export class PlanViewport extends Viewport {
     this.gridDivisions
   );
 
-  objectStateManager = new ObjectStateManager();
+  objectManager = new ObjectManager();
   // CURSOR
   private cursor = new CursorCrosshair();
 
@@ -85,11 +82,11 @@ export class PlanViewport extends Viewport {
 
       // Only cast rays to objects that are not selected
       let intersections = this.raycaster.intersectObjects(
-        this.objectStateManager.getPrimaryDeselectedObjects()
+        this.objectManager.getPrimaryDeselectedObjects()
       );
 
       // On each mousemove deselect all highlighted
-      this.objectStateManager.defaultAllHighlighted();
+      this.objectManager.defaultAllHighlighted();
 
       // If we have any intersections
       if (intersections.length > 0) {
@@ -102,14 +99,19 @@ export class PlanViewport extends Viewport {
         });
         // find that object in all created lineObjs
         const intersectId = intersection.object.id;
-        const intersectLineObj =
-          this.objectStateManager.getByPrimaryId(intersectId);
+        const intersectLineObj = this.objectManager.getByPrimaryId(intersectId);
 
         // Finally highlight if the distance is < 0.1
-        if (intersection.point.distanceToSquared(worldPosition) < 0.1) {
+        if (
+          intersection.point.distanceToSquared(worldPosition) <
+          this.highlightDistance
+        ) {
           intersectLineObj.setState(ObjectStates.highlight);
-        } else if (intersection.point.distanceToSquared(worldPosition) >= 0.1) {
-          this.objectStateManager.defaultAllHighlighted();
+        } else if (
+          intersection.point.distanceToSquared(worldPosition) >=
+          this.highlightDistance
+        ) {
+          this.objectManager.defaultAllHighlighted();
         }
       }
     });
@@ -118,18 +120,18 @@ export class PlanViewport extends Viewport {
     // TODO: remove this eventlistener when creating the line
     this.divElement.addEventListener("click", () => {
       // get all highlighted objects
-      const allHighlighted = this.objectStateManager.getByState(
+      const allHighlighted = this.objectManager.getByState(
         ObjectStates.highlight
       );
       // if there are highlighted objects
       if (allHighlighted.length > 0) {
         // change highlighted to selected
-        this.objectStateManager
+        this.objectManager
           .getByState(ObjectStates.highlight)[0]
           .setState(ObjectStates.selected);
       } else {
         // if there are no highlighted objects, clear selection
-        this.objectStateManager.defaultAllSelected();
+        this.objectManager.defaultAllSelected();
       }
     });
   }
@@ -204,7 +206,7 @@ export class PlanViewport extends Viewport {
         this.scene.add(newLine.getPlanGroup());
 
         // add to manager with default state
-        this.objectStateManager.add(newLine, ObjectStates.default);
+        this.objectManager.add(newLine, ObjectStates.default);
 
         this.scene.remove(previewLine);
 
