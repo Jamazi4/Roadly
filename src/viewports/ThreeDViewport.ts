@@ -27,7 +27,7 @@ export class ThreeDViewport extends Viewport {
     this.camera.up.set(0, 0, 1);
     this.controller = new OrbitControls(this.camera, this.renderer.domElement);
 
-    this.gridHelper.rotateX(1.5807);
+    this.gridHelper.rotateX(Math.PI / 2);
 
     this.scene.add(this.hemiSphereLight);
     this.scene.add(this.directionalLight);

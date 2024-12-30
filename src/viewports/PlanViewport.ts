@@ -3,6 +3,10 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { Viewport } from "./Viewport";
 import { CursorCrosshair } from "../utils/CursorCrosshair";
 import { LineObj } from "../Objects/LineObj";
+import {
+  ObjectStateManager,
+  ObjectStates,
+} from "../components/ObjectStateManager";
 
 export class PlanViewport extends Viewport {
   // Camera
@@ -28,15 +32,12 @@ export class PlanViewport extends Viewport {
     this.gridDivisions
   );
 
-  public linesList: LineObj[] = [];
-  private highlights: LineObj[] = [];
-  public intersectionList: THREE.Object3D[] = [];
+  objectStateManager = new ObjectStateManager();
   // CURSOR
   private cursor = new CursorCrosshair();
 
   constructor(divId: string) {
     super(divId);
-    this.cursor.get().name = "2dcursor";
     this.camera.position.set(0, 0, 10);
     this.camera.up.set(0, 0, 1);
     this.controller = new OrbitControls(this.camera, this.renderer.domElement);
@@ -81,19 +82,17 @@ export class PlanViewport extends Viewport {
       this.cursor.setPosition(worldPosition.x, worldPosition.y, 0);
 
       // highlighting objects
+
+      // Only cast rays to objects that are not selected
       let intersections = this.raycaster.intersectObjects(
-        this.intersectionList
+        this.objectStateManager.getPrimaryDeselectedObjects()
       );
+
+      // On each mousemove deselect all highlighted
+      this.objectStateManager.defaultAllHighlighted();
+
+      // If we have any intersections
       if (intersections.length > 0) {
-        // put out all highlights
-        this.highlights.forEach((line: LineObj) => {
-          line.unhighlight();
-          // line.getPlanGroup().material = line.defaultMat;
-        });
-
-        // empty the highlights list
-        this.highlights = [];
-
         // find closest object from intersections list
         const intersection = intersections.reduce((closest, curr) => {
           return curr.point.distanceTo(worldPosition) <
@@ -101,25 +100,38 @@ export class PlanViewport extends Viewport {
             ? curr
             : closest;
         });
-
-        const intersectId = intersection.object.id;
-
         // find that object in all created lineObjs
-        const intersectLineObj = this.linesList.filter((line: LineObj) => {
-          return line.getPlanRepr().id === intersectId;
-        });
-
-        // push to highlights for tracking
-        this.highlights.push(intersectLineObj[0]);
+        const intersectId = intersection.object.id;
+        const intersectLineObj =
+          this.objectStateManager.getByPrimaryId(intersectId);
 
         // Finally highlight if the distance is < 0.1
         if (intersection.point.distanceToSquared(worldPosition) < 0.1) {
-          this.highlights[0].highlight();
+          intersectLineObj.setState(ObjectStates.highlight);
+        } else if (intersection.point.distanceToSquared(worldPosition) >= 0.1) {
+          this.objectStateManager.defaultAllHighlighted();
         }
       }
     });
 
-    // this.divElement.addEventListener()
+    // selecting highlighted object
+    // TODO: remove this eventlistener when creating the line
+    this.divElement.addEventListener("click", () => {
+      // get all highlighted objects
+      const allHighlighted = this.objectStateManager.getByState(
+        ObjectStates.highlight
+      );
+      // if there are highlighted objects
+      if (allHighlighted.length > 0) {
+        // change highlighted to selected
+        this.objectStateManager
+          .getByState(ObjectStates.highlight)[0]
+          .setState(ObjectStates.selected);
+      } else {
+        // if there are no highlighted objects, clear selection
+        this.objectStateManager.defaultAllSelected();
+      }
+    });
   }
 
   // Convert mouse client coords to world coords
@@ -191,9 +203,8 @@ export class PlanViewport extends Viewport {
         newLine.createPlan(points[0], points[1]);
         this.scene.add(newLine.getPlanGroup());
 
-        // push to array of lineObjs and array ob Object3D for intersection
-        this.linesList.push(newLine);
-        this.intersectionList.push(newLine.getPlanGroup());
+        // add to manager with default state
+        this.objectStateManager.add(newLine, ObjectStates.default);
 
         this.scene.remove(previewLine);
 

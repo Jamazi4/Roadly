@@ -1,27 +1,37 @@
 import * as THREE from "three";
 import { VertexMarker } from "../utils/VertexMarker";
+import { RoadlyObj } from "./RoadlyObj";
+import { ObjectStates } from "../components/ObjectStateManager";
 
-export class LineObj {
+export class LineObj extends RoadlyObj {
   defaultMat = new THREE.LineBasicMaterial({ color: 0x4287f5 });
   planGeom = new THREE.BufferGeometry();
   planRepr: THREE.Line = new THREE.Line();
   planGroup: THREE.Group = new THREE.Group();
 
-  constructor() {}
+  constructor() {
+    super();
+  }
 
   createPlan(start: THREE.Vector3, end: THREE.Vector3) {
     this.planGeom.setFromPoints([start, end]);
     this.planRepr = new THREE.Line(this.planGeom, this.defaultMat);
+    this.primaryId = this.planRepr.id;
     this.planRepr.name = "line";
     this.planGroup.add(this.planRepr);
-    console.log(this.planGroup.id);
+    this.groupId = this.planGroup.id;
   }
 
   highlight() {
     this.planRepr.material = this.highlightMaterial();
   }
 
+  unhighlight() {
+    this.planRepr.material = this.defaultMat;
+  }
+
   select() {
+    this.planRepr.material = this.highlightMaterial(2);
     const positions = this.planRepr.geometry.attributes.position.array;
     for (let i = 0; i < positions.length; i += 3) {
       const x = positions[i];
@@ -32,6 +42,18 @@ export class LineObj {
       marker.getMarker().name = `marker${i}`;
       marker.getMarker().position.set(x, y, z);
       this.planGroup.add(marker.getMarker());
+    }
+  }
+
+  deselect() {
+    for (let i = this.planGroup.children.length - 1; i >= 0; i--) {
+      const obj = this.planGroup.children[i];
+      if (obj.name.includes("marker")) {
+        this.planGroup.remove(obj);
+      }
+      if (obj instanceof THREE.Line) {
+        obj.material = this.defaultMat;
+      }
     }
   }
 
@@ -59,9 +81,5 @@ export class LineObj {
     const brightenedColor = (r << 16) | (g << 8) | b;
 
     return new THREE.LineBasicMaterial({ color: brightenedColor });
-  }
-
-  unhighlight() {
-    this.planRepr.material = this.defaultMat;
   }
 }

@@ -19,6 +19,7 @@ export class CursorCrosshair {
   constructor() {
     this.lineGroup.add(this.line1);
     this.lineGroup.add(this.line2);
+    this.lineGroup.name = "2dcursor";
   }
 
   setPosition(x: number, y: number, z: number) {
