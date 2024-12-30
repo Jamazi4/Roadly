@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { VertexMarker } from "../utils/VertexMarker";
 import { RoadlyObj } from "./RoadlyObj";
-import { ObjectStates } from "../components/ObjectManager";
 
 export class LineObj extends RoadlyObj {
   defaultMat = new THREE.LineBasicMaterial({ color: 0x4287f5 });
@@ -41,6 +40,7 @@ export class LineObj extends RoadlyObj {
       const marker = new VertexMarker();
       marker.getMarker().name = `marker${i}`;
       marker.getMarker().position.set(x, y, z);
+      this.markers.push(marker);
       this.planGroup.add(marker.getMarker());
     }
   }

@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 
 import { Viewport } from "./Viewport";
+import { ObjectManager } from "../components/ObjectManager";
 
 export class ThreeDViewport extends Viewport {
   // Camera
@@ -22,8 +23,8 @@ export class ThreeDViewport extends Viewport {
 
   private initialDistance: number;
 
-  constructor(divId: string) {
-    super(divId);
+  constructor(divId: string, objectManager: ObjectManager) {
+    super(divId, objectManager);
     this.camera.lookAt(0, 0, 0);
     this.camera.position.set(5, 5, 5);
     this.camera.up.set(0, 0, 1);
@@ -41,7 +42,7 @@ export class ThreeDViewport extends Viewport {
   }
 
   protected onZoomUpdate(): void {
-    this.controller.addEventListener("change", (e) => {
+    this.controller.addEventListener("change", () => {
       const currentDistance = this.camera.position.distanceTo(
         this.controller.target
       );

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { ObjectStates } from "../components/ObjectManager";
+import { VertexMarker } from "../utils/VertexMarker";
 
 export abstract class RoadlyObj {
   abstract highlight(): void;
@@ -10,6 +11,8 @@ export abstract class RoadlyObj {
   abstract planRepr: THREE.Line; // TODO: extend for other types as well
   abstract planGroup: THREE.Group;
   abstract defaultMat: THREE.LineBasicMaterial;
+
+  markers: VertexMarker[] = [];
 
   highlighted = false;
   selected = false;
@@ -59,5 +62,10 @@ export abstract class RoadlyObj {
         this.selected = true;
       }
     }
+  }
+  updateMarkerSize(zoomFactor: number) {
+    this.markers.forEach((marker: VertexMarker): void => {
+      marker.updateSize(zoomFactor);
+    });
   }
 }

@@ -82,5 +82,9 @@ export class ObjectManager {
     return obj[0];
   }
 
-  updateMarkerSize() {}
+  updateOnZoom(zoomFactor: number) {
+    this.container.forEach((object: RoadlyObj) => {
+      object.updateMarkerSize(zoomFactor);
+    });
+  }
 }

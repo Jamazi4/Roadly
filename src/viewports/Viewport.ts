@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
+import { ObjectManager } from "../components/ObjectManager";
 
 export abstract class Viewport {
   // DOM
@@ -26,7 +27,10 @@ export abstract class Viewport {
 
   protected initialFov = 75;
 
-  constructor(divId: string) {
+  objectManager: ObjectManager;
+
+  constructor(divId: string, objectManager: ObjectManager) {
+    this.objectManager = objectManager;
     this.divElement = document.getElementById(divId)!;
     this.promptMessageElement =
       this.divElement.querySelector(".prompt-message")!;
@@ -42,17 +46,17 @@ export abstract class Viewport {
     this.divElement.appendChild(this.renderer.domElement);
   }
 
-  // overriden in 3D
+  // overriden in 3D for fov/distance differences
   protected onZoomUpdate(): void {
-    this.controller.addEventListener("change", (e) => {
+    this.controller.addEventListener("change", () => {
       this.highlightDistance = this.baseHighlightDistance / this.camera.zoom;
+      this.objectManager.updateOnZoom(this.camera.zoom);
     });
   }
 
   public update(): void {
     this.renderer.render(this.scene, this.camera);
     this.controller.update();
-    this.onZoomUpdate();
 
     // console.log(this.highlightDistance);
   }

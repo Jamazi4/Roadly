@@ -29,12 +29,12 @@ export class PlanViewport extends Viewport {
     this.gridDivisions
   );
 
-  objectManager = new ObjectManager();
   // CURSOR
+  // TODO: ensure each viewport has some cursor
   private cursor = new CursorCrosshair();
 
-  constructor(divId: string) {
-    super(divId);
+  constructor(divId: string, objectManager: ObjectManager) {
+    super(divId, objectManager);
     this.camera.position.set(0, 0, 10);
     this.camera.up.set(0, 0, 1);
     this.controller = new OrbitControls(this.camera, this.renderer.domElement);
@@ -44,6 +44,7 @@ export class PlanViewport extends Viewport {
     this.gridHelper.rotation.set(Math.PI / 2, 0, 0);
     this.scene.add(this.gridHelper);
     this.raycaster = new THREE.Raycaster();
+    this.onZoomUpdate();
   }
 
   resize(): void {

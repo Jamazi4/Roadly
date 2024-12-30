@@ -1,6 +1,7 @@
 import * as THREE from "three";
+import { ConstantScreenSize } from "./VertexMarker";
 
-export class CursorCrosshair {
+export class CursorCrosshair implements ConstantScreenSize {
   points1 = [
     new THREE.Vector3(-1, 0, 0.1), // Start point
     new THREE.Vector3(1, 0, 0.1), // End point
@@ -29,4 +30,6 @@ export class CursorCrosshair {
   get() {
     return this.lineGroup;
   }
+
+  updateSize(zoomFactor: number): void {}
 }
