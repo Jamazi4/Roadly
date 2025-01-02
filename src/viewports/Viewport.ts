@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { ObjectManager } from "../components/ObjectManager";
+import { ViewportManager } from "../components/ViewportManager";
 
 export abstract class Viewport {
   // DOM
@@ -28,8 +29,18 @@ export abstract class Viewport {
   protected initialFov = 75;
 
   objectManager: ObjectManager;
+  viewportManager: ViewportManager;
 
-  constructor(divId: string, objectManager: ObjectManager) {
+  name: string;
+
+  constructor(
+    divId: string,
+    objectManager: ObjectManager,
+    viewportManager: ViewportManager
+  ) {
+    this.name = divId;
+    this.viewportManager = viewportManager;
+    this.viewportManager.addViewport(this);
     this.objectManager = objectManager;
     this.divElement = document.getElementById(divId)!;
     this.promptMessageElement =

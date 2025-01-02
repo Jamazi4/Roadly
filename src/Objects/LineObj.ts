@@ -4,6 +4,7 @@ import { RoadlyObj } from "./RoadlyObj";
 
 export class LineObj extends RoadlyObj {
   defaultMat = new THREE.LineBasicMaterial({ color: 0x4287f5 });
+
   planGeom = new THREE.BufferGeometry();
   planRepr: THREE.Line = new THREE.Line();
   planGroup: THREE.Group = new THREE.Group();

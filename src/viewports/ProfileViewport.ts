@@ -6,7 +6,7 @@ import { LineObj } from "../Objects/LineObj";
 import { ObjectManager, ObjectStates } from "../components/ObjectManager";
 import { ViewportManager } from "../components/ViewportManager";
 
-export class PlanViewport extends Viewport {
+export class ProfileViewport extends Viewport {
   // Camera
   private frustumSize = 10;
   protected camera = new THREE.OrthographicCamera(
@@ -137,11 +137,11 @@ export class PlanViewport extends Viewport {
         )[0];
 
         lineToSelect.setState(ObjectStates.selected);
-        this.viewportManager.setSelectedPlan(lineToSelect);
+        this.viewportManager.setSelectedProfile(lineToSelect);
       } else {
         // if there are no highlighted objects, clear selection
         this.objectManager.defaultAllSelected();
-        this.viewportManager.removeSelectedPlan();
+        this.viewportManager.removeSelectedProfile();
       }
     });
   }
@@ -217,7 +217,7 @@ export class PlanViewport extends Viewport {
 
         // add to manager with default state
         this.objectManager.add(newLine, ObjectStates.default);
-        this.viewportManager.addPlan(newLine);
+        this.viewportManager.addProf(newLine);
 
         this.scene.remove(previewLine);
 

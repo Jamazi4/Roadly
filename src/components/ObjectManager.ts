@@ -1,3 +1,4 @@
+import { LineObj } from "../Objects/LineObj";
 import { RoadlyObj } from "../Objects/RoadlyObj";
 import * as THREE from "three";
 
@@ -17,15 +18,13 @@ export enum PrimaryNames {
 
 export class ObjectManager {
   container: RoadlyObj[] = [];
+  curSelected: RoadlyObj = new LineObj();
 
   constructor() {}
 
   add(obj: RoadlyObj, state: ObjectStates) {
     if (!this.container.includes(obj)) {
       this.container.push(obj);
-      obj.setState(state);
-    } else {
-      if (obj.state === state) return;
       obj.setState(state);
     }
   }
