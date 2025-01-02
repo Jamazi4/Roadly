@@ -25,10 +25,6 @@ export class ProfileViewport extends Viewport {
   raycaster: THREE.Raycaster;
 
   // GRID
-  protected gridHelper = new THREE.GridHelper(
-    this.gridSize,
-    this.gridDivisions
-  );
 
   // CURSOR
   // TODO: ensure each viewport has some cursor
@@ -46,10 +42,23 @@ export class ProfileViewport extends Viewport {
     this.controller.enableRotate = false;
     this.controller.screenSpacePanning = true;
     this.controller.target.set(0, 0, 0);
-    this.gridHelper.rotation.set(Math.PI / 2, 0, 0);
-    this.scene.add(this.gridHelper);
     this.raycaster = new THREE.Raycaster();
     this.onZoomUpdate();
+  }
+
+  createProfileGrid(lineDistance: number) {
+    const gridMat = new THREE.LineBasicMaterial({ color: 0x404040 });
+    const gridGroup = new THREE.Group();
+    const line0points = [
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(lineDistance, 0, 0),
+    ];
+    const line0Geom = new THREE.BufferGeometry().setFromPoints(line0points);
+    const line0 = new THREE.Line(line0Geom, gridMat);
+
+    gridGroup.add(line0);
+    console.log(`profileviewport's recieved length: ${lineDistance}`);
+    this.scene.add(gridGroup);
   }
 
   resize(): void {
@@ -161,7 +170,7 @@ export class ProfileViewport extends Viewport {
     return worldPosition;
   }
 
-  createPlanLine(): LineObj {
+  createProfileLine(): LineObj {
     // Start prompt message
     this.promptMessageElement.classList.toggle("hidden");
     this.promptMessageElement.innerText = "Pick first point of the new line";
@@ -212,8 +221,8 @@ export class ProfileViewport extends Viewport {
 
         // create line, add to scene,
         // remove this listener and return geom buffer
-        newLine.createPlan(points[0], points[1]);
-        this.scene.add(newLine.getPlanGroup());
+        newLine.create(points[0], points[1]);
+        this.scene.add(newLine.getGroup());
 
         // add to manager with default state
         this.objectManager.add(newLine, ObjectStates.default);

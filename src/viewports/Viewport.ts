@@ -16,12 +16,8 @@ export abstract class Viewport {
   public scene = new THREE.Scene();
   protected backgroundColor = new THREE.Color(0x202020);
 
-  protected gridSize = 10;
-  protected gridDivisions = 10;
-
   protected abstract camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
   protected abstract controller: OrbitControls;
-  protected abstract gridHelper: THREE.GridHelper;
 
   protected baseHighlightDistance = 0.01;
   protected highlightDistance = this.baseHighlightDistance;

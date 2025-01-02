@@ -5,34 +5,34 @@ import { RoadlyObj } from "./RoadlyObj";
 export class LineObj extends RoadlyObj {
   defaultMat = new THREE.LineBasicMaterial({ color: 0x4287f5 });
 
-  planGeom = new THREE.BufferGeometry();
-  planRepr: THREE.Line = new THREE.Line();
-  planGroup: THREE.Group = new THREE.Group();
+  Geom = new THREE.BufferGeometry();
+  Repr: THREE.Line = new THREE.Line();
+  Group: THREE.Group = new THREE.Group();
 
   constructor() {
     super();
   }
 
-  createPlan(start: THREE.Vector3, end: THREE.Vector3) {
-    this.planGeom.setFromPoints([start, end]);
-    this.planRepr = new THREE.Line(this.planGeom, this.defaultMat);
-    this.primaryId = this.planRepr.id;
-    this.planRepr.name = "line";
-    this.planGroup.add(this.planRepr);
-    this.groupId = this.planGroup.id;
+  create(start: THREE.Vector3, end: THREE.Vector3) {
+    this.Geom.setFromPoints([start, end]);
+    this.Repr = new THREE.Line(this.Geom, this.defaultMat);
+    this.primaryId = this.Repr.id;
+    this.Repr.name = "line";
+    this.Group.add(this.Repr);
+    this.groupId = this.Group.id;
   }
 
   highlight() {
-    this.planRepr.material = this.highlightMaterial();
+    this.Repr.material = this.highlightMaterial();
   }
 
   unhighlight() {
-    this.planRepr.material = this.defaultMat;
+    this.Repr.material = this.defaultMat;
   }
 
   select() {
-    this.planRepr.material = this.highlightMaterial(2);
-    const positions = this.planRepr.geometry.attributes.position.array;
+    this.Repr.material = this.highlightMaterial(2);
+    const positions = this.Repr.geometry.attributes.position.array;
     for (let i = 0; i < positions.length; i += 3) {
       const x = positions[i];
       const y = positions[i + 1];
@@ -42,15 +42,15 @@ export class LineObj extends RoadlyObj {
       marker.getMarker().name = `marker${i}`;
       marker.getMarker().position.set(x, y, z);
       this.markers.push(marker);
-      this.planGroup.add(marker.getMarker());
+      this.Group.add(marker.getMarker());
     }
   }
 
   deselect() {
-    for (let i = this.planGroup.children.length - 1; i >= 0; i--) {
-      const obj = this.planGroup.children[i];
+    for (let i = this.Group.children.length - 1; i >= 0; i--) {
+      const obj = this.Group.children[i];
       if (obj.name.includes("marker")) {
-        this.planGroup.remove(obj);
+        this.Group.remove(obj);
       }
       if (obj instanceof THREE.Line) {
         obj.material = this.defaultMat;
@@ -58,12 +58,12 @@ export class LineObj extends RoadlyObj {
     }
   }
 
-  getPlanGroup(): THREE.Group {
-    return this.planGroup;
+  getGroup(): THREE.Group {
+    return this.Group;
   }
 
-  getPlanRepr(): THREE.Line {
-    return this.planRepr;
+  getRepr(): THREE.Line {
+    return this.Repr;
   }
 
   highlightMaterial(factor = 1.5) {

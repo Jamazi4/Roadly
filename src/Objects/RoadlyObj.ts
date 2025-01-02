@@ -7,9 +7,9 @@ export abstract class RoadlyObj {
   abstract unhighlight(): void;
   abstract select(): void;
   abstract deselect(): void;
-  abstract planGeom: THREE.BufferGeometry;
-  abstract planRepr: THREE.Line; // TODO: extend for other types as well
-  abstract planGroup: THREE.Group;
+  abstract Geom: THREE.BufferGeometry;
+  abstract Repr: THREE.Line; // TODO: extend for other types as well
+  abstract Group: THREE.Group;
   abstract defaultMat: THREE.LineBasicMaterial;
 
   markers: VertexMarker[] = [];
@@ -21,8 +21,8 @@ export abstract class RoadlyObj {
   primaryId: number = 0;
   groupId: number = 0;
 
-  getPlanGroup(): THREE.Group {
-    return this.planGroup;
+  getGroup(): THREE.Group {
+    return this.Group;
   }
 
   setState(state: ObjectStates) {

@@ -11,7 +11,7 @@ btnLinePlan.addEventListener("click", (e) => {
 const btnLineProfile = document.getElementById("btn-line-profile")!;
 btnLineProfile.addEventListener("click", (e) => {
   e.stopPropagation();
-  profileViewport.createPlanLine();
+  profileViewport.createProfileLine();
 });
 
 // Init viewports

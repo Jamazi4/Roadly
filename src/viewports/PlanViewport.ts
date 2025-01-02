@@ -25,6 +25,8 @@ export class PlanViewport extends Viewport {
   raycaster: THREE.Raycaster;
 
   // GRID
+  gridSize = 10;
+  gridDivisions = 10;
   protected gridHelper = new THREE.GridHelper(
     this.gridSize,
     this.gridDivisions
@@ -212,8 +214,8 @@ export class PlanViewport extends Viewport {
 
         // create line, add to scene,
         // remove this listener and return geom buffer
-        newLine.createPlan(points[0], points[1]);
-        this.scene.add(newLine.getPlanGroup());
+        newLine.create(points[0], points[1]);
+        this.scene.add(newLine.getGroup());
 
         // add to manager with default state
         this.objectManager.add(newLine, ObjectStates.default);

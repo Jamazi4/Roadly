@@ -53,7 +53,7 @@ export class ObjectManager {
     const primaryItems: THREE.Object3D[] = [];
     this.container.forEach((obj: RoadlyObj) => {
       if (obj.state !== ObjectStates.selected) {
-        obj.getPlanGroup().children.forEach((childObj) => {
+        obj.getGroup().children.forEach((childObj) => {
           if (
             Object.values(PrimaryNames).some((primaryName) =>
               childObj.name.includes(primaryName)

@@ -1,6 +1,7 @@
-import { LineObj } from "../Objects/LineObj";
 import { RoadlyObj } from "../Objects/RoadlyObj";
+import { ProfileViewport } from "../viewports/ProfileViewport";
 import { Viewport } from "../viewports/Viewport";
+import * as THREE from "three";
 
 export class ViewportManager {
   viewports: { [key: string]: Viewport } = {};
@@ -40,15 +41,19 @@ export class ViewportManager {
 
   unlockProf() {
     if (this.selectedPlan) {
-      this.profLockEl?.classList.toggle("hidden");
-      this.displayProf();
-      console.log(this.profLockEl);
+      const points = this.selectedPlan.Repr.geometry.attributes.position.array;
+      const first = new THREE.Vector3(points[0], points[1], points[2]);
+      const second = new THREE.Vector3(points[3], points[4], points[5]);
+      const distance = first.distanceTo(second);
+      console.log(distance);
+      this.displayProf(distance);
+      this.profLockEl?.classList.add("hidden");
     }
   }
 
   lockProf() {
     if (!this.selectedPlan) {
-      this.profLockEl?.classList.toggle("hidden");
+      this.profLockEl?.classList.remove("hidden");
       this.viewports["profile-view"].scene.children = [];
     }
   }
@@ -64,11 +69,13 @@ export class ViewportManager {
     }
   }
 
-  displayProf() {
+  displayProf(lineDistance: number) {
     const currPlanId = this.selectedPlan?.primaryId;
+    const profViewport = this.viewports["profile-view"] as ProfileViewport;
     if (currPlanId) {
+      profViewport.createProfileGrid(lineDistance);
       this.profiles[currPlanId].forEach((obj: RoadlyObj) => {
-        this.viewports["profile-view"].scene.add(obj.getPlanGroup());
+        profViewport.scene.add(obj.getGroup());
       });
     }
   }
