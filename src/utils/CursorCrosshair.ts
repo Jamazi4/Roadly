@@ -32,6 +32,6 @@ export class CursorCrosshair implements ConstantScreenSize {
   }
 
   updateSize(zoomFactor: number): void {
-    console.log(zoomFactor);
+    zoomFactor++;
   }
 }
