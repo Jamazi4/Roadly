@@ -3,6 +3,7 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 
 import { Viewport } from "./Viewport";
 import { ObjectManager } from "../components/ObjectManager";
+import { ViewportManager } from "../components/ViewportManager";
 
 export class ThreeDViewport extends Viewport {
   // Camera
@@ -13,9 +14,11 @@ export class ThreeDViewport extends Viewport {
   private directionalLight = new THREE.DirectionalLight(0xffffff, 3);
 
   // Controller
-  protected controller: OrbitControls;
+  public controller: OrbitControls;
 
   // GRID
+  gridSize = 10;
+  gridDivisions = 10;
   protected gridHelper = new THREE.GridHelper(
     this.gridSize,
     this.gridDivisions
@@ -23,8 +26,12 @@ export class ThreeDViewport extends Viewport {
 
   private initialDistance: number;
 
-  constructor(divId: string, objectManager: ObjectManager) {
-    super(divId, objectManager);
+  constructor(
+    divId: string,
+    objectManager: ObjectManager,
+    viewportManager: ViewportManager
+  ) {
+    super(divId, objectManager, viewportManager);
     this.camera.lookAt(0, 0, 0);
     this.camera.position.set(5, 5, 5);
     this.camera.up.set(0, 0, 1);

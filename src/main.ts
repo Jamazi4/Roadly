@@ -2,6 +2,7 @@ import { ObjectManager } from "./components/ObjectManager";
 import { ViewportManager } from "./components/ViewportManager";
 import { PlanViewport } from "./viewports/PlanViewport";
 import { ProfileViewport } from "./viewports/ProfileViewport";
+import { ThreeDViewport } from "./viewports/ThreeDViewport";
 
 const btnLinePlan = document.getElementById("btn-line-plan")!;
 btnLinePlan.addEventListener("click", (e) => {
@@ -13,12 +14,18 @@ btnLineProfile.addEventListener("click", (e) => {
   e.stopPropagation();
   profileViewport.createProfileLine();
 });
+const btnActivateProfile = document.getElementById("btn-activate-profile")!;
+btnActivateProfile.addEventListener("click", (e) => {
+  e.stopPropagation();
+  viewportManager.create3D();
+});
 
 // Init viewports
 const viewportManager = new ViewportManager();
 
 const planObjectManager = new ObjectManager();
 const profileObjectManager = new ObjectManager();
+const threeDObjectManager = new ObjectManager();
 
 const planViewport = new PlanViewport(
   "plan-view",
@@ -26,7 +33,11 @@ const planViewport = new PlanViewport(
   viewportManager
 );
 
-// const threeDViewport = new ThreeDViewport("3d-view", objectManager);
+const threeDViewport = new ThreeDViewport(
+  "3d-view",
+  threeDObjectManager,
+  viewportManager
+);
 
 const profileViewport = new ProfileViewport(
   "profile-view",
@@ -49,17 +60,19 @@ const profileViewport = new ProfileViewport(
 
 // ANIM LOOP
 function animate() {
-  // threeDViewport.update();
+  requestAnimationFrame(animate);
+  threeDViewport.update();
   planViewport.update();
   profileViewport.update();
 }
-planViewport.renderer.setAnimationLoop(animate);
+animate();
+// planViewport.renderer.setAnimationLoop(animate);
 
 // RESIZING
 // TODO: Cursor is offsetted from mouse after resize
 window.addEventListener("resize", () => {
   planViewport.resize();
-  // threeDViewport.resize();
+  threeDViewport.resize();
   profileViewport.resize();
 });
 

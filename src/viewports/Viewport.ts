@@ -17,7 +17,7 @@ export abstract class Viewport {
   protected backgroundColor = new THREE.Color(0x202020);
 
   protected abstract camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
-  protected abstract controller: OrbitControls;
+  public abstract controller: OrbitControls;
 
   protected baseHighlightDistance = 0.01;
   protected highlightDistance = this.baseHighlightDistance;
@@ -63,7 +63,7 @@ export abstract class Viewport {
 
   public update(): void {
     this.renderer.render(this.scene, this.camera);
-    this.controller.update();
+    // this.controller.update();
 
     // console.log(this.highlightDistance);
   }

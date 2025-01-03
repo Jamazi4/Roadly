@@ -19,17 +19,21 @@ export class PlanViewport extends Viewport {
   );
 
   // Controller
-  protected controller: OrbitControls;
+  public controller: OrbitControls;
 
   // Raycaster
   raycaster: THREE.Raycaster;
 
   // GRID
-  gridSize = 10;
-  gridDivisions = 10;
+  gridSize = 100;
+  gridDivisions = 100;
+  gridCol1 = new THREE.Color(0.1, 0.1, 0.1);
+  gridCol2 = new THREE.Color(0.05, 0.05, 0.05);
   protected gridHelper = new THREE.GridHelper(
     this.gridSize,
-    this.gridDivisions
+    this.gridDivisions,
+    this.gridCol1,
+    this.gridCol2
   );
 
   // CURSOR

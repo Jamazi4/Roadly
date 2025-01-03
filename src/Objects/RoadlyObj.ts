@@ -68,4 +68,42 @@ export abstract class RoadlyObj {
       marker.updateSize(zoomFactor);
     });
   }
+
+  getLength(): number {
+    const points = this.getPoints();
+    return points[0].distanceTo(points[1]);
+  }
+
+  getPoints(): THREE.Vector3[] {
+    const points = this.Geom.attributes.position.array;
+
+    const [first, second] =
+      points[0] < points[1]
+        ? [
+            new THREE.Vector3(points[0], points[1], points[2]),
+            new THREE.Vector3(points[3], points[4], points[5]),
+          ]
+        : [
+            new THREE.Vector3(points[3], points[4], points[5]),
+            new THREE.Vector3(points[0], points[1], points[2]),
+          ];
+
+    return [first, second];
+  }
+
+  getHeightAtOrigin(x: number = 0): number {
+    const [first, second] = this.getPoints();
+
+    if (first.x === second.x) {
+      throw new Error("Line is vertical");
+    }
+
+    if (x < first.x || x > second.x) {
+      throw new Error("X is outside of the line extent");
+    }
+
+    const slope = (second.y - first.y) / (second.x - first.x);
+
+    return first.y + slope * (x - first.x);
+  }
 }

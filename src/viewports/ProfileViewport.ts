@@ -1,10 +1,11 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/Addons.js";
+import { CSS2DObject, OrbitControls } from "three/examples/jsm/Addons.js";
 import { Viewport } from "./Viewport";
 import { CursorCrosshair } from "../utils/CursorCrosshair";
 import { LineObj } from "../Objects/LineObj";
 import { ObjectManager, ObjectStates } from "../components/ObjectManager";
 import { ViewportManager } from "../components/ViewportManager";
+import { CSS2DRenderer } from "three/examples/jsm/Addons.js";
 
 export class ProfileViewport extends Viewport {
   // Camera
@@ -19,12 +20,13 @@ export class ProfileViewport extends Viewport {
   );
 
   // Controller
-  protected controller: OrbitControls;
+  public controller: OrbitControls;
 
   // Raycaster
   raycaster: THREE.Raycaster;
 
   // GRID
+  labelRenderer: CSS2DRenderer;
 
   // CURSOR
   // TODO: ensure each viewport has some cursor
@@ -38,15 +40,22 @@ export class ProfileViewport extends Viewport {
     super(divId, objectManager, viewportManager);
     this.camera.position.set(0, 0, 10);
     this.camera.up.set(0, 0, 1);
-    this.controller = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controller = new OrbitControls(this.camera, this.divElement);
     this.controller.enableRotate = false;
     this.controller.screenSpacePanning = true;
     this.controller.target.set(0, 0, 0);
     this.raycaster = new THREE.Raycaster();
     this.onZoomUpdate();
+
+    this.labelRenderer = new CSS2DRenderer();
+    this.labelRenderer.setSize(this.viewportWidth, this.viewportHeight);
+    this.labelRenderer.domElement.style.position = "absolute";
+    const menu = this.divElement.querySelector(".plan-view-menu")!;
+    this.divElement.insertBefore(this.labelRenderer.domElement, menu);
   }
 
   createProfileGrid(lineDistance: number) {
+    //grid
     const gridMat = new THREE.LineBasicMaterial({ color: 0x404040 });
     const gridGroup = new THREE.Group();
     const line0points = [
@@ -59,6 +68,34 @@ export class ProfileViewport extends Viewport {
     gridGroup.add(line0);
     console.log(`profileviewport's recieved length: ${lineDistance}`);
     this.scene.add(gridGroup);
+
+    // labels
+    const startLabelDiv = document.createElement("div");
+    startLabelDiv.className = "profile-label";
+    startLabelDiv.textContent = "(0.00, 0.00)";
+    const endLabelDiv = document.createElement("div");
+    endLabelDiv.textContent = `(${lineDistance.toFixed(2)}, 0.00)`;
+    endLabelDiv.className = "profile-label";
+
+    const startLabel = new CSS2DObject(startLabelDiv);
+    startLabel.position.set(
+      line0points[0].x,
+      line0points[0].y,
+      line0points[0].z
+    );
+
+    const endLabel = new CSS2DObject(endLabelDiv);
+    endLabel.position.set(line0points[1].x, line0points[1].y, line0points[1].z);
+
+    startLabel.center.set(0, 0);
+    endLabel.center.set(0, 0);
+    line0.add(startLabel);
+    line0.add(endLabel);
+  }
+
+  update() {
+    super.update();
+    this.labelRenderer.render(this.scene, this.camera);
   }
 
   resize(): void {
@@ -71,6 +108,8 @@ export class ProfileViewport extends Viewport {
 
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(this.viewportWidth, this.viewportHeight);
+
+    this.labelRenderer.setSize(this.viewportWidth, this.viewportHeight);
   }
 
   // Move to parent class after ensuring each viewport has some cursor
