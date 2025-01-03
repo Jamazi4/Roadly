@@ -26,7 +26,7 @@ export abstract class Viewport {
 
   objectManager: ObjectManager;
   viewportManager: ViewportManager;
-
+  creatingLine: boolean = false;
   name: string;
 
   constructor(
@@ -63,7 +63,7 @@ export abstract class Viewport {
 
   public update(): void {
     this.renderer.render(this.scene, this.camera);
-    // this.controller.update();
+    this.controller.update();
 
     // console.log(this.highlightDistance);
   }

@@ -50,7 +50,7 @@ export class ProfileViewport extends Viewport {
     this.labelRenderer = new CSS2DRenderer();
     this.labelRenderer.setSize(this.viewportWidth, this.viewportHeight);
     this.labelRenderer.domElement.style.position = "absolute";
-    const menu = this.divElement.querySelector(".plan-view-menu")!;
+    const menu = this.divElement.querySelector(".profile-view-menu")!;
     this.divElement.insertBefore(this.labelRenderer.domElement, menu);
   }
 
@@ -138,7 +138,7 @@ export class ProfileViewport extends Viewport {
       let intersections = this.raycaster.intersectObjects(
         this.objectManager.getPrimaryDeselectedObjects()
       );
-
+      if (this.creatingLine === true) return;
       // On each mousemove deselect all highlighted
       this.objectManager.defaultAllHighlighted();
 
@@ -170,10 +170,7 @@ export class ProfileViewport extends Viewport {
       }
     });
 
-    // selecting highlighted object
-    // TODO: remove this eventlistener when creating the line
-    this.divElement.addEventListener("click", () => {
-      // get all highlighted objects
+    const createLineClickListener = () => {
       const allHighlighted = this.objectManager.getByState(
         ObjectStates.highlight
       );
@@ -191,7 +188,30 @@ export class ProfileViewport extends Viewport {
         this.objectManager.defaultAllSelected();
         this.viewportManager.removeSelectedProfile();
       }
-    });
+    };
+    // selecting highlighted object
+    // TODO: remove this eventlistener when creating the line
+    this.divElement.addEventListener("click", createLineClickListener);
+  }
+
+  createLineClickListener() {
+    const allHighlighted = this.objectManager.getByState(
+      ObjectStates.highlight
+    );
+    // if there are highlighted objects
+    if (allHighlighted.length > 0) {
+      // change highlighted to selected
+      const lineToSelect = this.objectManager.getByState(
+        ObjectStates.highlight
+      )[0];
+
+      lineToSelect.setState(ObjectStates.selected);
+      this.viewportManager.setSelectedProfile(lineToSelect);
+    } else {
+      // if there are no highlighted objects, clear selection
+      this.objectManager.defaultAllSelected();
+      this.viewportManager.removeSelectedProfile();
+    }
   }
 
   // Convert mouse client coords to world coords
@@ -211,6 +231,7 @@ export class ProfileViewport extends Viewport {
 
   createProfileLine(): LineObj {
     // Start prompt message
+    this.creatingLine = true;
     this.promptMessageElement.classList.toggle("hidden");
     this.promptMessageElement.innerText = "Pick first point of the new line";
 
@@ -270,9 +291,9 @@ export class ProfileViewport extends Viewport {
         this.scene.remove(previewLine);
 
         this.divElement.removeEventListener("click", clickListener);
+        this.creatingLine = false;
       }
     };
-
     this.divElement.addEventListener("click", clickListener);
     return newLine;
   }

@@ -45,19 +45,6 @@ const profileViewport = new ProfileViewport(
   viewportManager
 );
 
-// BOX
-// const boxCol = new THREE.Color(0x4287f5);
-// const testBoxGeom = new THREE.BoxGeometry();
-// const testBoxMatPlan = new THREE.MeshBasicMaterial({
-//   color: boxCol,
-//   wireframe: true,
-// });
-// const testBoxMat3D = new THREE.MeshPhongMaterial({ color: boxCol });
-// const testBoxMesh3D = new THREE.Mesh(testBoxGeom, testBoxMat3D);
-// const testBoxMeshPlan = new THREE.Mesh(testBoxGeom, testBoxMatPlan);
-
-// threeDViewport.scene.add(testBoxMesh3D);
-
 // ANIM LOOP
 function animate() {
   requestAnimationFrame(animate);
@@ -66,7 +53,6 @@ function animate() {
   profileViewport.update();
 }
 animate();
-// planViewport.renderer.setAnimationLoop(animate);
 
 // RESIZING
 // TODO: Cursor is offsetted from mouse after resize

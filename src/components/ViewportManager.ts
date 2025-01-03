@@ -17,7 +17,6 @@ export class ViewportManager {
   constructor() {}
 
   addViewport(viewport: Viewport) {
-    console.log(viewport.name);
     this.viewports[viewport.name] = viewport;
   }
 
@@ -44,7 +43,6 @@ export class ViewportManager {
   unlockProf() {
     if (this.selectedPlan) {
       const distance = this.selectedPlan.getLength();
-      console.log(distance);
       this.displayProf(distance);
       this.profLockEl?.classList.add("hidden");
     }
@@ -93,28 +91,26 @@ export class ViewportManager {
     const planLength = this.selectedPlan!.getLength();
     const threeDviewport = this.viewports["3d-view"];
     if (this.selectedPlan && this.selectedProfile) {
-      this.selectedProfile.defaultMat = activeMat;
-      this.selectedProfile.select();
-
       const [l1, l2] = this.selectedProfile.getPoints();
       const [p1, p2] = this.selectedPlan.getPoints();
+
+      if (l1.x > 0 || l2.x < 0) {
+        throw new Error("Profile has to be full length");
+      }
+      this.selectedProfile.defaultMat = activeMat;
+      this.selectedProfile.select();
       let t1 = new THREE.Vector3();
       let t2 = new THREE.Vector3();
 
-      if (l1.x < 0) {
+      if (l1.x <= 0) {
         t1.x = p1.x;
         t1.y = p1.y;
         t1.z = this.selectedProfile.getHeightAtOrigin();
       }
-      if (l1.x > 0) {
-      }
-
-      if (l2.x > planLength) {
+      if (l2.x >= planLength) {
         t2.x = p2.x;
         t2.y = p2.y;
         t2.z = this.selectedProfile.getHeightAtOrigin(planLength);
-      }
-      if (l2.x < 0) {
       }
 
       const threeLine = new LineObj();

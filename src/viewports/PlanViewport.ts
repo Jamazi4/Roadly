@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/Addons.js";
+import { CSS2DRenderer, OrbitControls } from "three/examples/jsm/Addons.js";
 import { Viewport } from "./Viewport";
 import { CursorCrosshair } from "../utils/CursorCrosshair";
 import { LineObj } from "../Objects/LineObj";
@@ -35,7 +35,7 @@ export class PlanViewport extends Viewport {
     this.gridCol1,
     this.gridCol2
   );
-
+  labelRenderer: CSS2DRenderer;
   // CURSOR
   // TODO: ensure each viewport has some cursor
   private cursor = new CursorCrosshair();
@@ -48,7 +48,7 @@ export class PlanViewport extends Viewport {
     super(divId, objectManager, viewportManager);
     this.camera.position.set(0, 0, 10);
     this.camera.up.set(0, 0, 1);
-    this.controller = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controller = new OrbitControls(this.camera, this.divElement);
     this.controller.enableRotate = false;
     this.controller.screenSpacePanning = true;
     this.controller.target.set(0, 0, 0);
@@ -56,6 +56,16 @@ export class PlanViewport extends Viewport {
     this.scene.add(this.gridHelper);
     this.raycaster = new THREE.Raycaster();
     this.onZoomUpdate();
+
+    this.labelRenderer = new CSS2DRenderer();
+    this.labelRenderer.setSize(this.viewportWidth, this.viewportHeight);
+    this.labelRenderer.domElement.style.position = "absolute";
+    const menu = this.divElement.querySelector(".plan-view-menu")!;
+    this.divElement.insertBefore(this.labelRenderer.domElement, menu);
+  }
+  update() {
+    super.update();
+    this.labelRenderer.render(this.scene, this.camera);
   }
 
   resize(): void {
@@ -68,6 +78,7 @@ export class PlanViewport extends Viewport {
 
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(this.viewportWidth, this.viewportHeight);
+    this.labelRenderer.setSize(this.viewportWidth, this.viewportHeight);
   }
 
   // Move to parent class after ensuring each viewport has some cursor
@@ -96,7 +107,7 @@ export class PlanViewport extends Viewport {
       let intersections = this.raycaster.intersectObjects(
         this.objectManager.getPrimaryDeselectedObjects()
       );
-
+      if (this.creatingLine === true) return;
       // On each mousemove deselect all highlighted
       this.objectManager.defaultAllHighlighted();
 
@@ -168,6 +179,7 @@ export class PlanViewport extends Viewport {
   }
 
   createPlanLine(): LineObj {
+    this.creatingLine = true;
     // Start prompt message
     this.promptMessageElement.classList.toggle("hidden");
     this.promptMessageElement.innerText = "Pick first point of the new line";
@@ -228,9 +240,9 @@ export class PlanViewport extends Viewport {
         this.scene.remove(previewLine);
 
         this.divElement.removeEventListener("click", clickListener);
+        this.creatingLine = false;
       }
     };
-
     this.divElement.addEventListener("click", clickListener);
     return newLine;
   }

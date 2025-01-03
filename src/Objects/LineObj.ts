@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { VertexMarker } from "../utils/VertexMarker";
 import { RoadlyObj } from "./RoadlyObj";
+import { CSS2DObject } from "three/examples/jsm/Addons.js";
 
 export class LineObj extends RoadlyObj {
   defaultMat = new THREE.LineBasicMaterial({ color: 0x4287f5 });
@@ -8,6 +9,9 @@ export class LineObj extends RoadlyObj {
   Geom = new THREE.BufferGeometry();
   Repr: THREE.Line = new THREE.Line();
   Group: THREE.Group = new THREE.Group();
+  labelIds: number[] = [];
+  inputEls: HTMLInputElement[] = [];
+  points: THREE.Vector3[] = [];
 
   constructor() {
     super();
@@ -20,6 +24,7 @@ export class LineObj extends RoadlyObj {
     this.Repr.name = "line";
     this.Group.add(this.Repr);
     this.groupId = this.Group.id;
+    this.points = this.getPoints();
   }
 
   highlight() {
@@ -44,6 +49,93 @@ export class LineObj extends RoadlyObj {
       this.markers.push(marker);
       this.Group.add(marker.getMarker());
     }
+
+    const xInputEl1 = document.createElement("input");
+    this.inputEls.push(xInputEl1);
+    const xInput1 = new CSS2DObject(xInputEl1);
+    xInputEl1.className = "input-label";
+    this.labelIds.push(xInput1.id);
+
+    xInput1.position.set(
+      this.points[0].x,
+      this.points[0].y + 0.5,
+      this.points[0].z
+    );
+    xInputEl1.value = `${this.points[0].x}`;
+    this.Repr.add(xInput1);
+
+    const yInputEl1 = document.createElement("input");
+    this.inputEls.push(yInputEl1);
+    const yInput1 = new CSS2DObject(yInputEl1);
+    yInputEl1.className = "input-label";
+    this.labelIds.push(yInput1.id);
+
+    yInput1.position.set(
+      this.points[0].x,
+      this.points[0].y - 0.5,
+      this.points[0].z
+    );
+    yInputEl1.value = `${this.points[0].y}`;
+    this.Repr.add(yInput1);
+
+    const xInputEl2 = document.createElement("input");
+    this.inputEls.push(xInputEl2);
+    const xInput2 = new CSS2DObject(xInputEl2);
+    xInputEl2.className = "input-label";
+    this.labelIds.push(xInput2.id);
+
+    xInput2.position.set(
+      this.points[1].x,
+      this.points[1].y + 0.5,
+      this.points[1].z
+    );
+    xInputEl2.value = `${this.points[1].x}`;
+    this.Repr.add(xInput2);
+
+    const yInputEl2 = document.createElement("input");
+    this.inputEls.push(yInputEl2);
+    const yInput2 = new CSS2DObject(yInputEl2);
+    yInputEl2.className = "input-label";
+    this.labelIds.push(yInput2.id);
+
+    yInput2.position.set(
+      this.points[1].x,
+      this.points[1].y - 0.5,
+      this.points[1].z
+    );
+    yInputEl2.value = `${this.points[1].y}`;
+    this.Repr.add(yInput2);
+
+    // Prevent event propagation
+    xInputEl1.addEventListener("mousedown", (event) => {
+      event.stopPropagation();
+    });
+
+    xInputEl1.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+
+    this.inputEls.forEach((el: HTMLInputElement) => {
+      el.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          const newPoint1 = new THREE.Vector3(
+            +xInputEl1.value,
+            +yInputEl1.value,
+            0
+          );
+          const newPoint2 = new THREE.Vector3(
+            +xInputEl2.value,
+            +yInputEl2.value,
+            0
+          );
+
+          this.Geom.setFromPoints([newPoint1, newPoint2]);
+          this.points = [newPoint1, newPoint2];
+          this.deselect();
+          this.select();
+        }
+      });
+    });
   }
 
   deselect() {
@@ -56,6 +148,9 @@ export class LineObj extends RoadlyObj {
         obj.material = this.defaultMat;
       }
     }
+    this.labelIds.forEach((id: number) => {
+      this.Repr.remove(this.Repr.getObjectById(id)!);
+    });
   }
 
   getGroup(): THREE.Group {
