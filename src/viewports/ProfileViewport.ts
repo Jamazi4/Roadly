@@ -27,6 +27,8 @@ export class ProfileViewport extends Viewport {
 
   // GRID
   labelRenderer: CSS2DRenderer;
+  gridGroup = new THREE.Group();
+  line0 = new THREE.Line();
 
   // CURSOR
   // TODO: ensure each viewport has some cursor
@@ -57,24 +59,32 @@ export class ProfileViewport extends Viewport {
   createProfileGrid(lineDistance: number) {
     //grid
     const gridMat = new THREE.LineBasicMaterial({ color: 0x404040 });
-    const gridGroup = new THREE.Group();
+    this.scene.children = [];
+    this.labelRenderer.render(this.scene, this.camera);
+    this.gridGroup = new THREE.Group();
     const line0points = [
       new THREE.Vector3(0, 0, 0),
       new THREE.Vector3(lineDistance, 0, 0),
     ];
     const line0Geom = new THREE.BufferGeometry().setFromPoints(line0points);
-    const line0 = new THREE.Line(line0Geom, gridMat);
+    this.line0 = new THREE.Line(line0Geom, gridMat);
 
-    gridGroup.add(line0);
+    this.gridGroup.add(this.line0);
     console.log(`profileviewport's recieved length: ${lineDistance}`);
-    this.scene.add(gridGroup);
+    this.scene.add(this.gridGroup);
 
     // labels
     const startLabelDiv = document.createElement("div");
     startLabelDiv.className = "profile-label";
-    startLabelDiv.textContent = "(0.00, 0.00)";
+    startLabelDiv.textContent = `(${this.viewportManager.selectedPlan
+      ?.getPoints()[0]
+      .x!.toFixed(2)}, 
+      ${this.viewportManager.selectedPlan?.getPoints()[0].y!.toFixed(2)})`;
     const endLabelDiv = document.createElement("div");
-    endLabelDiv.textContent = `(${lineDistance.toFixed(2)}, 0.00)`;
+    endLabelDiv.textContent = `(${this.viewportManager.selectedPlan
+      ?.getPoints()[1]
+      .x!.toFixed(2)}, 
+      ${this.viewportManager.selectedPlan?.getPoints()[1].y!.toFixed(2)})`;
     endLabelDiv.className = "profile-label";
 
     const startLabel = new CSS2DObject(startLabelDiv);
@@ -89,8 +99,8 @@ export class ProfileViewport extends Viewport {
 
     startLabel.center.set(0, 0);
     endLabel.center.set(0, 0);
-    line0.add(startLabel);
-    line0.add(endLabel);
+    this.line0.add(startLabel);
+    this.line0.add(endLabel);
   }
 
   update() {
@@ -177,6 +187,7 @@ export class ProfileViewport extends Viewport {
       // if there are highlighted objects
       if (allHighlighted.length > 0) {
         // change highlighted to selected
+        this.objectManager.defaultAllSelected();
         const lineToSelect = this.objectManager.getByState(
           ObjectStates.highlight
         )[0];

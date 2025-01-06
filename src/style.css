@@ -43,15 +43,15 @@ body {
   position: relative;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr;
-  height: 45vh;
+  height: 50vh;
   width: calc(100vw - 2px);
 }
 .bottom-row {
   display: flex;
   grid-template-rows: 1fr;
   position: relative;
-  bottom: 36px;
-  height: 51vh;
+  /* bottom: auto; */
+  height: 50vh;
   width: calc(100vw);
 }
 

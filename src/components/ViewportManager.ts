@@ -22,6 +22,7 @@ export class ViewportManager {
 
   setSelectedPlan(obj: RoadlyObj) {
     this.selectedPlan = obj;
+    this.lockProf();
     this.unlockProf();
   }
 
@@ -49,19 +50,21 @@ export class ViewportManager {
   }
 
   lockProf() {
-    if (!this.selectedPlan) {
-      const profViewport = this.viewports["profile-view"];
-      this.profLockEl?.classList.remove("hidden");
-      profViewport.scene.children = [];
+    const profViewport = this.viewports["profile-view"];
+    this.profLockEl?.classList.remove("hidden");
+    profViewport.scene.children = [];
+    this.selectedProfile?.deselect();
+    this.removeLabels();
+  }
 
-      const labelElements = document.querySelectorAll(".profile-label");
+  removeLabels() {
+    const labelElements = document.querySelectorAll(".profile-label");
 
-      labelElements.forEach((label) => {
-        if (label && label.parentElement) {
-          label.parentElement.removeChild(label);
-        }
-      });
-    }
+    labelElements.forEach((label) => {
+      if (label && label.parentElement) {
+        label.parentElement.removeChild(label);
+      }
+    });
   }
 
   addPlan(obj: RoadlyObj) {

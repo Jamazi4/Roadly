@@ -149,6 +149,7 @@ export class PlanViewport extends Viewport {
       // if there are highlighted objects
       if (allHighlighted.length > 0) {
         // change highlighted to selected
+        this.objectManager.defaultAllSelected();
         const lineToSelect = this.objectManager.getByState(
           ObjectStates.highlight
         )[0];
